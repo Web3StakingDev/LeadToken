@@ -1,3 +1,7 @@
+pragma solidity >=0.5.0 < 0.6.0;
+
+import "./Owned.sol"
+
 contract LeadToken is Owned {
 
     // Public variables of the LeadToken
