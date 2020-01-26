@@ -32,7 +32,7 @@ contract LeadToken is Owned {
     mapping(address => mapping(address => uint)) public allowed;
     
     /**
-     * Constructor function
+     * Constructor function 
      *
      * Initializes contract with initial supply tokens to the creator of the contract
      */
