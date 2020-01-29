@@ -2,7 +2,7 @@ pragma solidity >=0.5.0 < 0.6.0;
 
 import "./Owned.sol";
 
-contract LeadToken is Owned {
+contract LeadToken is ERC20Interface {
 
     // Public variables of the LeadToken
     string public name = "LeadToken";
