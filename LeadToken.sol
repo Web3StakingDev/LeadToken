@@ -1,6 +1,6 @@
 pragma solidity >=0.5.0 < 0.6.0;
 
-import "./Owned.sol";
+import "./ERC20Interface.sol";
 
 contract LeadToken is ERC20Interface {
 
