@@ -1,8 +1,6 @@
 pragma solidity >=0.5.0 < 0.6.0;
 
-import "./ERC20Interface.sol";
-
-contract LeadToken is ERC20Interface {
+contract LeadToken {
 
     // Public variables of the LeadToken
     string public name = "LeadToken";
@@ -32,8 +30,8 @@ contract LeadToken is ERC20Interface {
     );
     
     // This creates an array with all balances
-    mapping(address => uint) public balanceOf;
-    mapping(address => mapping(address => uint)) public allowed;
+    mapping(address => uint) balances;
+    mapping(address => mapping(address => uint)) allowed;
     
     /**
      * Constructor function 
@@ -41,20 +39,20 @@ contract LeadToken is ERC20Interface {
      * Initializes contract with initial supply tokens to the creator of the contract
      */
     constructor(uint _initialSupply) public {
-        balanceOf[msg.sender] = totalSupply;
-        totalSupply = _initialSupply * 10 ** uint(decimals);
+        totalSupply = _initialSupply * 10 ** uint(decimals); 
+        balances[msg.sender] = totalSupply;
         emit Transfer(address(0x0), msg.sender, totalSupply);
     }
     
     /**
      * Internal transfer, can only be called by this contract
      */
-    function _transfer(address _from, address _to, uint _value) internal {
+    function _transfer(address _from, address payable _to, uint _value) internal {
         require(_to != address(0x0));
-        require(balanceOf[_from] >= _value);
-        require(balanceOf[_to] + _value >= balanceOf[_to]);
-        balanceOf[_from] -= _value;
-        balanceOf[_to] += _value;
+        require(balances[_from] >= _value);
+        require(balances[_to] + _value >= balances[_to]);
+        balances[_from] -= _value;
+        balances[_to] += _value;
         emit Transfer(_from, _to, _value);
     }
     
@@ -66,7 +64,7 @@ contract LeadToken is ERC20Interface {
      * @param _to The address of the recipient
      * @param _value the amount to send
      */
-    function transfer(address _to, uint _value) public returns(bool success){
+    function transfer(address payable _to, uint _value) public returns(bool success){
         _transfer(msg.sender, _to, _value);
         return true;
     }
@@ -80,7 +78,7 @@ contract LeadToken is ERC20Interface {
      * @param _to The address of the recipient
      * @param _value the amount to send
      */
-    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
+    function transferFrom(address _from, address payable _to, uint _value) public returns (bool success) {
         require(_value <= allowed[_from][msg.sender]);
         allowed[_from][msg.sender] -= _value;
         _transfer(_from, _to, _value);
@@ -109,6 +107,14 @@ contract LeadToken is ERC20Interface {
     }
     
     /**
+     * Get the token balance for account `tokenOwner`
+     */
+
+    function balanceOf(address _owner) public view returns (uint balance) {
+        return balances[_owner];
+    }
+    
+    /**
      * Destroy tokens
      *
      * Remove `_value` tokens from the system irreversibly
@@ -116,8 +122,8 @@ contract LeadToken is ERC20Interface {
      * @param _value is the amount of token to burn
      */
     function burn(uint _value) public returns (bool success) {
-        require(balanceOf[msg.sender] >= _value);   
-        balanceOf[msg.sender] -= _value;          
+        require(balances[msg.sender] >= _value);   
+        balances[msg.sender] -= _value;          
         totalSupply -= _value;                      
         emit Burn(msg.sender, _value);
         return true;
@@ -132,9 +138,9 @@ contract LeadToken is ERC20Interface {
      * @param _value the amount of money to burn
      */
     function burnFrom(address _from, uint _value) public returns (bool success) {
-        require(balanceOf[_from] >= _value);                
+        require(balances[_from] >= _value);                
         require(_value <= allowed[_from][msg.sender]); 
-        balanceOf[_from] -= _value;                        
+        balances[_from] -= _value;                        
         allowed[_from][msg.sender] -= _value;             
         totalSupply -= _value;                             
         emit Burn(_from, _value);
