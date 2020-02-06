@@ -13,7 +13,7 @@ interface ERC20Interface {
     event Approval(address indexed _owner, address indexed _spender, uint _tokens);
 }
 
-contract LeadToken is ERC20Interface {
+contract LeadToken is ERC20Interface, TokenLock {
 
     // Public variables of the LeadToken
     string public name = "LeadToken";
