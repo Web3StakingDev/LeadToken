@@ -1,7 +1,5 @@
 pragma solidity >=0.5.0 < 0.6.0;
 
-import "./TokenLock.sol";
-
 interface ERC20Interface {
     function totalSupply() external view returns (uint);
     function balanceOf(address _owner) external view returns (uint balance);
@@ -13,7 +11,7 @@ interface ERC20Interface {
     event Approval(address indexed _owner, address indexed _spender, uint _tokens);
 }
 
-contract LeadToken is ERC20Interface, TokenLock {
+contract LeadToken is ERC20Interface {
 
     // Public variables of the LeadToken
     string public name = "LeadToken";
