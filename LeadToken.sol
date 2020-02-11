@@ -1,5 +1,5 @@
 pragma solidity >=0.5.0 < 0.6.0;
-
+//import "./TokenLock.sol";
 interface ERC20Interface {
     function totalSupply() external view returns (uint);
     function balanceOf(address _owner) external view returns (uint balance);
@@ -10,15 +10,13 @@ interface ERC20Interface {
     event Transfer(address indexed _from, address indexed _to, uint _tokens);
     event Approval(address indexed _owner, address indexed _spender, uint _tokens);
 }
-
 contract LeadToken is ERC20Interface {
-
     // Public variables of the LeadToken
     string public name = "LeadToken";
     string public symbol = "LEAD";
     string public standard = "Lead Token v1.0";
     uint8 public decimals = 18; 
-    uint public totalSupply;
+    uint private _totalSupply;
     
     // Generates a public event on the blockchain that will notify clients
     event Transfer(
@@ -30,14 +28,14 @@ contract LeadToken is ERC20Interface {
     // This notifies clients about the amount burnt
     event Burn(
         address indexed from, 
-        uint256 value
+        uint value
     );
     
     // Generates a public event on the blockchain that will notify clients
     event Approval(
         address indexed _owner,
         address indexed _spender,
-        uint256 _value
+        uint _value
     );
     
     // This creates an array with all balances
@@ -50,14 +48,12 @@ contract LeadToken is ERC20Interface {
      * Initializes contract with initial supply tokens to the creator of the contract
      */
     constructor(uint _initialSupply) public {
-        totalSupply = _initialSupply * 10 ** uint(decimals); 
-        balances[msg.sender] = totalSupply;
-        emit Transfer(address(0x0), msg.sender, totalSupply);
+        _totalSupply = _initialSupply * 10 ** uint(decimals); 
+        balances[msg.sender] = _totalSupply;
+        
+        emit Transfer(address(0x0), msg.sender, _totalSupply);
     }
     
-    /**
-     * Returns the total suppy of the LEAD token
-     */
     function totalSupply() external view returns (uint) {
         return _totalSupply;
     }
@@ -65,7 +61,7 @@ contract LeadToken is ERC20Interface {
     /**
      * Internal transfer, can only be called by this contract
      */
-    function _transfer(address _from, address payable _to, uint _value) internal {
+    function _transfer(address _from, address _to, uint _value) internal {
         require(_to != address(0x0));
         require(balances[_from] >= _value);
         require(balances[_to] + _value >= balances[_to]);
@@ -82,7 +78,7 @@ contract LeadToken is ERC20Interface {
      * @param _to The address of the recipient
      * @param _value the amount to send
      */
-    function transfer(address payable _to, uint _value) public returns(bool success){
+    function transfer(address _to, uint _value) public returns(bool success){
         _transfer(msg.sender, _to, _value);
         return true;
     }
@@ -96,7 +92,7 @@ contract LeadToken is ERC20Interface {
      * @param _to The address of the recipient
      * @param _value the amount to send
      */
-    function transferFrom(address _from, address payable _to, uint _value) public returns (bool success) {
+    function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
         require(_value <= allowed[_from][msg.sender]);
         allowed[_from][msg.sender] -= _value;
         _transfer(_from, _to, _value);
@@ -127,9 +123,25 @@ contract LeadToken is ERC20Interface {
     /**
      * Get the token balance for account `tokenOwner`
      */
-
     function balanceOf(address _owner) public view returns (uint balance) {
         return balances[_owner];
+    }
+    
+    /** 
+     * @dev Creates `amount` tokens and assigns them to `account`, increasing
+     * the total supply.
+     *
+     * Emits a {Transfer} event with `from` set to the zero address.
+     *
+     * Requirements
+     *
+     * - `to` cannot be the zero address.
+     */
+    function _mint(address _account, uint256 _amount) internal {
+        require(_account != address(0x0), "ERC20: mint to the zero address");
+        _totalSupply += _amount;
+        balances[_account] += _amount;
+        emit Transfer(address(0), _account, _amount);
     }
     
     /**
@@ -142,7 +154,7 @@ contract LeadToken is ERC20Interface {
     function burn(uint _value) public returns (bool success) {
         require(balances[msg.sender] >= _value);   
         balances[msg.sender] -= _value;          
-        totalSupply -= _value;                      
+        _totalSupply -= _value;                      
         emit Burn(msg.sender, _value);
         return true;
     }
@@ -160,7 +172,7 @@ contract LeadToken is ERC20Interface {
         require(_value <= allowed[_from][msg.sender]); 
         balances[_from] -= _value;                        
         allowed[_from][msg.sender] -= _value;             
-        totalSupply -= _value;                             
+        _totalSupply -= _value;                             
         emit Burn(_from, _value);
         return true;
     }
