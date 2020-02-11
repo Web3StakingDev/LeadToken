@@ -39,4 +39,3 @@ contract Owned {
         emit OwnershipTransferred(owner, _newOwner); 
     }
 }
-
