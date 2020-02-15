@@ -2,10 +2,11 @@ pragma solidity >=0.5.0 < 0.6.0;
 
 /**
  * @title Owned
+ * Copied from OpenZeppelin/openzeppelin-contracts/blob/master/contracts/ownership/Ownable.sol
  * @dev The Owned contract has an owner address, and provides basic authorization control
  * functions, this simplifies the implementation of "user permissions".
  */
- 
+  
 contract Owned {
     address public owner;
 
