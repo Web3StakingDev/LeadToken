@@ -1,5 +1,30 @@
 pragma solidity >=0.5.0 < 0.6.0;
+
 //import "./TokenLock.sol";
+
+library SafeMath {
+
+    function add(uint a, uint b) internal pure returns (uint c) {
+        c = a + b;
+        require(c >= a);
+    }
+
+    function sub(uint a, uint b) internal pure returns (uint c) {
+        require(b <= a);
+        c = a - b;
+    }
+
+    function mul(uint a, uint b) internal pure returns (uint c) {
+        c = a * b;
+        require(a == 0 || c / a == b);
+    }
+
+    function div(uint a, uint b) internal pure returns (uint c) {
+        require(b > 0);
+        c = a / b;
+    }
+}
+
 interface ERC20Interface {
     function totalSupply() external view returns (uint);
     function balanceOf(address _owner) external view returns (uint balance);
@@ -11,6 +36,8 @@ interface ERC20Interface {
     event Approval(address indexed _owner, address indexed _spender, uint _tokens);
 }
 contract LeadToken is ERC20Interface {
+    using SafeMath for uint;
+    
     // Public variables of the LeadToken
     string public name = "LeadToken";
     string public symbol = "LEAD";
@@ -29,7 +56,7 @@ contract LeadToken is ERC20Interface {
     event Burn(
         address indexed from, 
         uint value
-    );
+    );                                                                                          
     
     // Generates a public event on the blockchain that will notify clients
     event Approval(
@@ -64,9 +91,9 @@ contract LeadToken is ERC20Interface {
     function _transfer(address _from, address _to, uint _value) internal {
         require(_to != address(0x0));
         require(balances[_from] >= _value);
-        require(balances[_to] + _value >= balances[_to]);
-        balances[_from] -= _value;
-        balances[_to] += _value;
+        require(balances[_to].add(_value) >= balances[_to]);
+        balances[_from] = balances[_from].sub(_value);
+        balances[_to] = balances[_to].add(_value);
         emit Transfer(_from, _to, _value);
     }
     
@@ -94,7 +121,7 @@ contract LeadToken is ERC20Interface {
      */
     function transferFrom(address _from, address _to, uint _value) public returns (bool success) {
         require(_value <= allowed[_from][msg.sender]);
-        allowed[_from][msg.sender] -= _value;
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);
         _transfer(_from, _to, _value);
         return true;
     }
@@ -139,8 +166,8 @@ contract LeadToken is ERC20Interface {
      */
     function _mint(address _account, uint256 _amount) internal {
         require(_account != address(0x0), "ERC20: mint to the zero address");
-        _totalSupply += _amount;
-        balances[_account] += _amount;
+        _totalSupply = _totalSupply.add(_amount);
+        balances[_account] = balances[_account].add(_amount);
         emit Transfer(address(0), _account, _amount);
     }
     
@@ -153,8 +180,8 @@ contract LeadToken is ERC20Interface {
      */
     function burn(uint _value) public returns (bool success) {
         require(balances[msg.sender] >= _value);   
-        balances[msg.sender] -= _value;          
-        _totalSupply -= _value;                      
+        balances[msg.sender] = balances[msg.sender].sub(_value);
+        _totalSupply = _totalSupply.sub(_value);                      
         emit Burn(msg.sender, _value);
         return true;
     }
@@ -170,9 +197,9 @@ contract LeadToken is ERC20Interface {
     function burnFrom(address _from, uint _value) public returns (bool success) {
         require(balances[_from] >= _value);                
         require(_value <= allowed[_from][msg.sender]); 
-        balances[_from] -= _value;                        
-        allowed[_from][msg.sender] -= _value;             
-        _totalSupply -= _value;                             
+        balances[_from] =  balances[_from].sub(_value);                        
+        allowed[_from][msg.sender] = allowed[_from][msg.sender].sub(_value);             
+        _totalSupply = _totalSupply.sub(_value);                             
         emit Burn(_from, _value);
         return true;
     }
