@@ -12,7 +12,7 @@ import "./LeadToken.sol";
  * Useful for simple vesting schedules like "advisors get all of their tokens
  * after 1 year".
  */
-contract TokenLock is Owned {
+contract TokenLock is Owned, LeadToken {
     // ERC20 basic token contract being held
     ERC20Interface private _token;
 
@@ -55,10 +55,8 @@ contract TokenLock is Owned {
      */
     function release() public onlyOwner {
         require(block.timestamp >= _releaseTime, "TokenTimelock: current time is before release time");
-
         uint amount = _token.balanceOf(address(this));
         require(amount > 0, "TokenTimelock: no tokens to release");
-
         _token.transfer(_beneficiary, amount);
     }
 }
