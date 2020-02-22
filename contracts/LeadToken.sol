@@ -1,9 +1,8 @@
 pragma solidity >=0.5.0 < 0.6.0;
 
-//import "./TokenLock.sol";
+import "./Owned.sol";
 
 library SafeMath {
-
     function add(uint a, uint b) internal pure returns (uint c) {
         c = a + b;
         require(c >= a);
@@ -35,7 +34,9 @@ interface ERC20Interface {
     event Transfer(address indexed _from, address indexed _to, uint _tokens);
     event Approval(address indexed _owner, address indexed _spender, uint _tokens);
 }
-contract LeadToken is ERC20Interface {
+
+contract LeadToken is ERC20Interface, Owned {
+    
     using SafeMath for uint;
     
     // Public variables of the LeadToken
@@ -77,7 +78,6 @@ contract LeadToken is ERC20Interface {
     constructor(uint _initialSupply) public {
         _totalSupply = _initialSupply * 10 ** uint(decimals); 
         balances[msg.sender] = _totalSupply;
-        
         emit Transfer(address(0x0), msg.sender, _totalSupply);
     }
     
@@ -202,6 +202,14 @@ contract LeadToken is ERC20Interface {
         _totalSupply = _totalSupply.sub(_value);                             
         emit Burn(_from, _value);
         return true;
+    }
+    
+    /**
+     * Owner can transfer out any accidentally sent ERC20 tokens
+     */
+
+    function transferAnyERC20Token(address _tokenAddress, uint _tokens) public onlyOwner returns (bool success) {
+        return ERC20Interface(_tokenAddress).transfer(owner, _tokens);
     }
     
 }
